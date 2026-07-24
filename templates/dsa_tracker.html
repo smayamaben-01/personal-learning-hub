@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>DSA Tracker</h1>
+<table>
+    <tr>
+        <th>Topics</th>
+        <th>Status</th>
+        <th>Questions Solved</th>
+    </tr>
+    {% for topic in topics %}
+    <tr>
+        <td>{{ topic.topic_name }}</td>
+        <td>{{ topic.status }}</td>
+        <td>{{ topic.questions_solved }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
