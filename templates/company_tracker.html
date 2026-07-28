@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>Company Tracker</h1>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('add_company_name') }}">
+        <input type="text" name="company_name" placeholder="Company name" required>
+        <select name="status">
+            <option value="Applied">Applied</option>
+            <option value="OA">OA</option>
+            <option value="Interview">Interview</option>
+            <option value="Rejected">Rejected</option>
+            <option value="Selected">Selected</option>
+        </select>
+        <button type="submit">Add Company</button>
+    </form>
+
+    <table>
+    <tr>
+        <th>Company</th>
+        <th>Status</th>
+        <th>Actions</th>
+    </tr>
+    {% for company in companies %}
+    <tr>
+        <td>{{ company.company_name }}</td>
+        <td>
+            <form method="POST" action="{{ url_for('update_company_status', company_id=company.id) }}">
+                <select name="status">
+                    <option value="Applied" {% if company.status == 'Applied' %}selected{% endif %}>Applied</option>
+                    <option value="OA" {% if company.status == 'OA' %}selected{% endif %}>OA</option>
+                    <option value="Interview" {% if company.status == 'Interview' %}selected{% endif %}>Interview</option>
+                    <option value="Rejected" {% if company.status == 'Rejected' %}selected{% endif %}>Rejected</option>
+                    <option value="Selected" {% if company.status == 'Selected' %}selected{% endif %}>Selected</option>
+                </select>
+                <button type="submit">Update</button>
+            </form>
+        </td>
+        <td>
+            <form method="POST" action="{{ url_for('delete_company', company_id=company.id) }}" onsubmit="return confirm('Delete this company?');">
+                <button type="submit">Delete</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+    </table>
+{% endblock %}

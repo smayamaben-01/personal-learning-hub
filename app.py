@@ -87,13 +87,134 @@ def logout():
     flash('You have been logged out.')
     return redirect(url_for('login'))
 
+#DSA Tracker
+
 @app.route('/dsa')
 @login_required
 def dsa_tracker():
+    user_id = session['user_id']
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM dsa_topics WHERE user_id = %s", (1,))
+    cursor.execute("SELECT * FROM dsa_topics WHERE user_id = %s", (user_id,))
     topics = cursor.fetchall()
     cursor.close()
     conn.close()
     return render_template('dsa_tracker.html', topics=topics)
+
+@app.route('/dsa/add', methods=['POST'])
+@login_required
+def add_dsa_topic():
+    user_id = session['user_id']
+    topic_name = request.form['topic_name']
+
+    if not topic_name:
+        flash('Topic name is required.')
+        return redirect(url_for('dsa_tracker'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO dsa_topics (user_id, topic_name) VALUES (%s, %s)", (user_id, topic_name))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    flash('Topic added!')
+    return redirect(url_for('dsa_tracker'))
+
+@app.route('/dsa/update/<int:topic_id>', methods=['POST'])
+@login_required
+def update_dsa_topic(topic_id):
+    user_id = session['user_id']
+    status = request.form['status']
+    questions_solved = request.form['questions_solved']
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE dsa_topics SET status = %s, questions_solved = %s WHERE id = %s AND user_id = %s", (status, questions_solved, topic_id, user_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    flash('Topic updated!')
+    return redirect(url_for('dsa_tracker'))
+
+@app.route('/dsa/delete/<int:topic_id>', methods=['POST'])
+@login_required
+def delete_dsa_topic(topic_id):
+    user_id = session['user_id']
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM dsa_topics WHERE id = %s AND user_id = %s", (topic_id, user_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    flash('Topic deleted.')
+    return redirect(url_for('dsa_tracker'))
+
+#Company Tracker
+
+@app.route('/companies')
+@login_required
+def company_tracker():
+    user_id = session['user_id']
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM companies WHERE user_id = %s", (user_id,))
+    names = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return render_template('company_tracker.html', companies=names)
+
+@app.route('/companies/add', methods=['POST'])
+@login_required
+def add_company_name():
+    user_id = session['user_id']
+    company_name = request.form['company_name']
+    status = request.form['status']
+
+    if not company_name:
+        flash('Company name is required.')
+        return redirect(url_for('company_tracker'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO companies (user_id, company_name, status) VALUES (%s, %s, %s)", (user_id, company_name, status))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    flash('Company added!')
+    return redirect(url_for('company_tracker'))
+
+@app.route('/companies/update/<int:company_id>', methods=['POST'])
+@login_required
+def update_company_status(company_id):
+    user_id = session['user_id']
+    status = request.form['status']
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE companies SET status = %s WHERE id = %s AND user_id = %s", (status, company_id, user_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    flash('Company status updated!')
+    return redirect(url_for('company_tracker'))
+
+@app.route('/companies/delete/<int:company_id>', methods=['POST'])
+@login_required
+def delete_company(company_id):
+    user_id = session['user_id']
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM companies WHERE id = %s AND user_id = %s", (company_id, user_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    flash('Company deleted.')
+    return redirect(url_for('company_tracker'))

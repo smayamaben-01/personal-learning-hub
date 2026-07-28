@@ -1,17 +1,52 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>DSA Tracker</h1>
+
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
+
+<form method="POST" action="{{ url_for('add_dsa_topic') }}">
+    <input type="text" name="topic_name" placeholder="Topic name" required>
+    <button type="submit">Add Topic</button>
+</form>
+
 <table>
     <tr>
         <th>Topics</th>
         <th>Status</th>
         <th>Questions Solved</th>
+        <th>Actions</th>
     </tr>
     {% for topic in topics %}
     <tr>
         <td>{{ topic.topic_name }}</td>
-        <td>{{ topic.status }}</td>
-        <td>{{ topic.questions_solved }}</td>
+        <td>
+            <form method="POST" action="{{ url_for('update_dsa_topic', topic_id=topic.id) }}">
+                <select name="status">
+                    <option value="Not Started" {% if topic.status == 'Not Started' %}selected{% endif %}>Not Started</option>
+                    <option value="In Progress" {% if topic.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                    <option value="Completed" {% if topic.status == 'Completed' %}selected{% endif %}>Completed</option>
+                </select>
+        </td>
+        <td>
+                <input type="number" name="questions_solved" value="{{ topic.questions_solved }}" min="0">
+        </td>
+        <td>
+                <button type="submit">Submit</button>
+            </form>
+        </td>
+        <td>
+            <form method="POST" action="{{ url_for('delete_dsa_topic', topic_id=topic.id) }}" onsubmit="return confirm('Delete this topic?');">
+                <button type="submit">Delete</button>
+            </form>
+        </td>
     </tr>
     {% endfor %}
 </table>
