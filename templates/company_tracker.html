@@ -24,6 +24,7 @@
         <button type="submit">Add Company</button>
     </form>
 
+    {% if companies %}
     <table>
     <tr>
         <th>Company</th>
@@ -53,4 +54,7 @@
     </tr>
     {% endfor %}
     </table>
+    {% else %}
+    <p>No companies yet - add one above!</p>
+    {% endif %}
 {% endblock %}

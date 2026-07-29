@@ -17,6 +17,7 @@
     <button type="submit">Add Topic</button>
 </form>
 
+{% if topics %}
 <table>
     <tr>
         <th>Topics</th>
@@ -50,4 +51,8 @@
     </tr>
     {% endfor %}
 </table>
+{% else %}
+<p>No topics yet - add one above!</p>
+{% endif %}
+
 {% endblock %}

@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>Dashboard</h1>
-<p>Welcome to your Personal Learning Hub.</p>
+<p>Welcome back! Here's your progress:</p>
+<div>
+    <p>DSA Topics: {{ completed_topics }} / {{ total_topics }} completed</p>
+    <p>Companies tracked: {{ total_companies }}</p>
+    <p>Notes: {{ total_notes }}</p>
+</div>
 {% endblock %}

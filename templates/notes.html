@@ -18,6 +18,7 @@
     <button type="submit">Save</button>
 </form>
 
+{% if notes %}
 <div>
     {% for note in notes %}
         <div>
@@ -31,5 +32,8 @@
         </div>
     {% endfor %}
 </div>
+{% else %}
+<p>No notes yet - add one above!</p>
+{% endif %}
 
 {% endblock %}

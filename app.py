@@ -19,7 +19,26 @@ app.secret_key = config.SECRET_KEY
 @app.route('/')
 @login_required
 def home():
-    return render_template('dashboard.html')
+    user_id = session['user_id']
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("SELECT COUNT(*) AS total FROM dsa_topics WHERE user_id = %s", (user_id,))
+    total_topics = cursor.fetchone()['total']
+
+    cursor.execute("SELECT COUNT(*) AS completed FROM dsa_topics WHERE user_id = %s AND status = 'Completed'", (user_id,))
+    completed_topics = cursor.fetchone()['completed']
+
+    cursor.execute("SELECT COUNT(*) AS total FROM companies WHERE user_id = %s", (user_id,))
+    total_companies = cursor.fetchone()['total']
+
+    cursor.execute("SELECT COUNT(*) AS total FROM notes WHERE user_id = %s", (user_id,))
+    total_notes = cursor.fetchone()['total']
+
+    cursor.close()
+    conn.close()
+
+    return render_template('dashboard.html', total_topics=total_topics, completed_topics=completed_topics, total_companies=total_companies, total_notes=total_notes)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
