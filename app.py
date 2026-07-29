@@ -218,3 +218,86 @@ def delete_company(company_id):
 
     flash('Company deleted.')
     return redirect(url_for('company_tracker'))
+
+@app.route('/notes')
+@login_required
+def notes():
+    user_id = session['user_id']
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM notes WHERE user_id = %s ORDER BY created_at DESC", (user_id,))
+    all_notes = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return render_template('notes.html', notes=all_notes)
+
+@app.route('/notes/add', methods=['POST'])
+@login_required
+def add_notes():
+    user_id = session['user_id']
+    title = request.form['title']
+    content = request.form['content']
+
+    if not title:
+        flash('Title is required.')
+        return redirect(url_for('notes'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO notes (user_id, title, content) VALUES (%s, %s, %s)", (user_id, title, content))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    flash('New note added!')
+    return redirect(url_for('notes'))
+
+@app.route('/notes/edit/<int:note_id>')
+@login_required
+def edit_note(note_id):
+    user_id = session['user_id']
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM notes WHERE id = %s AND user_id = %s", (note_id, user_id))
+    note = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if not note:
+        flash('Note not found.')
+        return redirect(url_for('notes'))
+
+    return render_template('edit_note.html', note=note)
+
+@app.route('/notes/update/<int:note_id>', methods=['POST'])
+@login_required
+def update_existing_note(note_id):
+    user_id = session['user_id']
+    title = request.form['title']
+    content = request.form['content']
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE notes SET title = %s, content = %s WHERE id = %s AND user_id = %s ", (title, content, note_id, user_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    flash('Note updated!')
+    return redirect(url_for('notes'))
+
+@app.route('/notes/delete/<int:note_id>', methods=['POST'])
+@login_required
+def delete_note(note_id):
+    user_id = session['user_id']
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM notes WHERE id = %s AND user_id = %s", (note_id, user_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    flash('Note deleted.')
+    return redirect(url_for('notes'))
