@@ -197,6 +197,10 @@ def add_company_name():
         flash('Company name is required.')
         return redirect(url_for('company_tracker'))
 
+    if len(company_name) > 100:
+        flash('Company name must be 100 characters or fewer.')
+        return redirect(url_for('company_tracker'))
+
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("INSERT INTO companies (user_id, company_name, status) VALUES (%s, %s, %s)", (user_id, company_name, status))
