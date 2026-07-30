@@ -14,6 +14,10 @@ A placement-prep tracker built with Flask and MySQL — helps students track DSA
 - Database: MySQL
 - Frontend: HTML, CSS, JavaScript
 
+🔗 **Live demo:** https://personal-learning-hub.onrender.com
+
+> Note: hosted on a free tier — the first load after inactivity may take 10-30 seconds while the server wakes up.
+
 ## Setup Instructions
 
 1. Clone the repo:
