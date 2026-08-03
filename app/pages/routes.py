@@ -1,22 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
-from werkzeug.security import generate_password_hash, check_password_hash
-from db import get_db_connection
-import config
-from functools import wraps
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from app.extensions import get_db_connection
+from app.decorators import login_required
 
-def login_required(f):
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        if 'user_id' not in session:
-            flash('Please log in to access this page.')
-            return redirect(url_for('login'))
-        return f(*args, **kwargs)
-    return wrapper
+pages_bp = Blueprint('pages', __name__)
 
-app = Flask(__name__)
-app.secret_key = config.SECRET_KEY
-
-@app.route('/')
+@pages_bp.route('/')
 @login_required
 def home():
     user_id = session['user_id']
@@ -40,75 +28,9 @@ def home():
 
     return render_template('dashboard.html', total_topics=total_topics, completed_topics=completed_topics, total_companies=total_companies, total_notes=total_notes)
 
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-
-        if not username or not password:
-            flash('Username and password are required.')
-            return redirect(url_for('register'))
-
-        if len(username) > 50:
-            flash('Username must be 50 characters or fewer.')
-            return redirect(url_for('register'))
-
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-
-        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
-        existing_user = cursor.fetchone()
-
-        if existing_user:
-            flash('That username is already taken.')
-            cursor.close()
-            conn.close()
-            return redirect(url_for('register'))
-
-        hashed_password = generate_password_hash(password)
-        cursor.execute("INSERT INTO users (username, password_hash) VALUES (%s, %s)", (username, hashed_password))
-        conn.commit()
-        cursor.close()
-        conn.close()
-
-        flash('Registration successful! You can now log in.')
-        return redirect(url_for('login'))
-
-    return render_template('register.html')
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
-        user = cursor.fetchone()
-        cursor.close()
-        conn.close()
-
-        if user and check_password_hash(user['password_hash'], password):
-            session['user_id'] = user['id']
-            flash('Logged in successfully!')
-            return redirect(url_for('home'))
-        else:
-            flash('Invalid username or password.')
-            return redirect(url_for('login'))
-
-    return render_template('login.html')
-
-@app.route('/logout')
-def logout():
-    session.clear()
-    flash('You have been logged out.')
-    return redirect(url_for('login'))
-
 #DSA Tracker
 
-@app.route('/dsa')
+@pages_bp.route('/dsa')
 @login_required
 def dsa_tracker():
     user_id = session['user_id']
@@ -120,7 +42,7 @@ def dsa_tracker():
     conn.close()
     return render_template('dsa_tracker.html', topics=topics)
 
-@app.route('/dsa/add', methods=['POST'])
+@pages_bp.route('/dsa/add', methods=['POST'])
 @login_required
 def add_dsa_topic():
     user_id = session['user_id']
@@ -128,7 +50,7 @@ def add_dsa_topic():
 
     if not topic_name:
         flash('Topic name is required.')
-        return redirect(url_for('dsa_tracker'))
+        return redirect(url_for('pages.dsa_tracker'))
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -138,9 +60,9 @@ def add_dsa_topic():
     conn.close()
 
     flash('Topic added!')
-    return redirect(url_for('dsa_tracker'))
+    return redirect(url_for('pages.dsa_tracker'))
 
-@app.route('/dsa/update/<int:topic_id>', methods=['POST'])
+@pages_bp.route('/dsa/update/<int:topic_id>', methods=['POST'])
 @login_required
 def update_dsa_topic(topic_id):
     user_id = session['user_id']
@@ -155,9 +77,9 @@ def update_dsa_topic(topic_id):
     conn.close()
 
     flash('Topic updated!')
-    return redirect(url_for('dsa_tracker'))
+    return redirect(url_for('pages.dsa_tracker'))
 
-@app.route('/dsa/delete/<int:topic_id>', methods=['POST'])
+@pages_bp.route('/dsa/delete/<int:topic_id>', methods=['POST'])
 @login_required
 def delete_dsa_topic(topic_id):
     user_id = session['user_id']
@@ -170,11 +92,11 @@ def delete_dsa_topic(topic_id):
     conn.close()
 
     flash('Topic deleted.')
-    return redirect(url_for('dsa_tracker'))
+    return redirect(url_for('pages.dsa_tracker'))
 
 #Company Tracker
 
-@app.route('/companies')
+@pages_bp.route('/companies')
 @login_required
 def company_tracker():
     user_id = session['user_id']
@@ -186,7 +108,7 @@ def company_tracker():
     conn.close()
     return render_template('company_tracker.html', companies=names)
 
-@app.route('/companies/add', methods=['POST'])
+@pages_bp.route('/companies/add', methods=['POST'])
 @login_required
 def add_company_name():
     user_id = session['user_id']
@@ -195,11 +117,11 @@ def add_company_name():
 
     if not company_name:
         flash('Company name is required.')
-        return redirect(url_for('company_tracker'))
+        return redirect(url_for('pages.company_tracker'))
 
     if len(company_name) > 100:
         flash('Company name must be 100 characters or fewer.')
-        return redirect(url_for('company_tracker'))
+        return redirect(url_for('pages.company_tracker'))
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -209,9 +131,9 @@ def add_company_name():
     conn.close()
 
     flash('Company added!')
-    return redirect(url_for('company_tracker'))
+    return redirect(url_for('pages.company_tracker'))
 
-@app.route('/companies/update/<int:company_id>', methods=['POST'])
+@pages_bp.route('/companies/update/<int:company_id>', methods=['POST'])
 @login_required
 def update_company_status(company_id):
     user_id = session['user_id']
@@ -225,9 +147,9 @@ def update_company_status(company_id):
     conn.close()
 
     flash('Company status updated!')
-    return redirect(url_for('company_tracker'))
+    return redirect(url_for('pages.company_tracker'))
 
-@app.route('/companies/delete/<int:company_id>', methods=['POST'])
+@pages_bp.route('/companies/delete/<int:company_id>', methods=['POST'])
 @login_required
 def delete_company(company_id):
     user_id = session['user_id']
@@ -240,9 +162,9 @@ def delete_company(company_id):
     conn.close()
 
     flash('Company deleted.')
-    return redirect(url_for('company_tracker'))
+    return redirect(url_for('pages.company_tracker'))
 
-@app.route('/notes')
+@pages_bp.route('/notes')
 @login_required
 def notes():
     user_id = session['user_id']
@@ -254,7 +176,7 @@ def notes():
     conn.close()
     return render_template('notes.html', notes=all_notes)
 
-@app.route('/notes/add', methods=['POST'])
+@pages_bp.route('/notes/add', methods=['POST'])
 @login_required
 def add_notes():
     user_id = session['user_id']
@@ -263,7 +185,7 @@ def add_notes():
 
     if not title:
         flash('Title is required.')
-        return redirect(url_for('notes'))
+        return redirect(url_for('pages.notes'))
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -273,9 +195,9 @@ def add_notes():
     conn.close()
 
     flash('New note added!')
-    return redirect(url_for('notes'))
+    return redirect(url_for('pages.notes'))
 
-@app.route('/notes/edit/<int:note_id>')
+@pages_bp.route('/notes/edit/<int:note_id>')
 @login_required
 def edit_note(note_id):
     user_id = session['user_id']
@@ -289,11 +211,11 @@ def edit_note(note_id):
 
     if not note:
         flash('Note not found.')
-        return redirect(url_for('notes'))
+        return redirect(url_for('pages.notes'))
 
     return render_template('edit_note.html', note=note)
 
-@app.route('/notes/update/<int:note_id>', methods=['POST'])
+@pages_bp.route('/notes/update/<int:note_id>', methods=['POST'])
 @login_required
 def update_existing_note(note_id):
     user_id = session['user_id']
@@ -308,9 +230,9 @@ def update_existing_note(note_id):
     conn.close()
 
     flash('Note updated!')
-    return redirect(url_for('notes'))
+    return redirect(url_for('pages.notes'))
 
-@app.route('/notes/delete/<int:note_id>', methods=['POST'])
+@pages_bp.route('/notes/delete/<int:note_id>', methods=['POST'])
 @login_required
 def delete_note(note_id):
     user_id = session['user_id']
@@ -323,4 +245,4 @@ def delete_note(note_id):
     conn.close()
 
     flash('Note deleted.')
-    return redirect(url_for('notes'))
+    return redirect(url_for('pages.notes'))

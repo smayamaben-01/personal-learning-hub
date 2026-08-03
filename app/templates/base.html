@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lnag = 'eng'>
+    <head>
+        <meta charset ="UTF-8">
+        <title>Personal Learning Hub</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    </head>
+    <body>
+        <nav>
+            <a href="{{ url_for('pages.home') }}">Dashboard</a>
+            <a href="{{ url_for('pages.dsa_tracker') }}">DSA Tracker</a>
+            <a href="{{ url_for('pages.company_tracker') }}">Company Tracker</a>
+            <a href="{{ url_for('pages.notes') }}">Notes</a>
+            <a href="{{ url_for('auth.register') }}">Register</a>
+            <a href="{{ url_for('auth.login') }}">Login</a>
+            <a href="{{ url_for('auth.logout') }}">Logout</a>
+        </nav>
+
+        <main>
+            {% block content %}{% endblock %}
+        </main>
+    </body>
+</html>

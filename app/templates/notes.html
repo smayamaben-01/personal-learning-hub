@@ -12,7 +12,7 @@
     {% endif %}
 {% endwith %}
 
-<form method="POST" action="{{ url_for('add_notes') }}">
+<form method="POST" action="{{ url_for('pages.add_notes') }}">
     <input type="text" name="title" placeholder="Title" required>
     <textarea name="content" rows="5"></textarea>
     <button type="submit">Save</button>
@@ -25,8 +25,8 @@
             <h3>{{ note.title }}</h3>
             <p>{{ note.content }}</p>
             <small>{{ note.created_at }}</small>
-            <a href="{{ url_for('edit_note', note_id=note.id) }}">Edit</a>
-            <form method="POST" action="{{ url_for('delete_note', note_id=note.id) }}" onsubmit="return confirm('Delete this note?');" style="display:inline;">
+            <a href="{{ url_for('pages.edit_note', note_id=note.id) }}">Edit</a>
+            <form method="POST" action="{{ url_for('pages.delete_note', note_id=note.id) }}" onsubmit="return confirm('Delete this note?');" style="display:inline;">
                 <button type="submit">Delete</button>
             </form>
         </div>

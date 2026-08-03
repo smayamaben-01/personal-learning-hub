@@ -12,7 +12,7 @@
     {% endif %}
 {% endwith %}
 
-<form method="POST" action="{{ url_for('add_dsa_topic') }}">
+<form method="POST" action="{{ url_for('pages.add_dsa_topic') }}">
     <input type="text" name="topic_name" placeholder="Topic name" required>
     <button type="submit">Add Topic</button>
 </form>
@@ -29,7 +29,7 @@
     <tr>
         <td>{{ topic.topic_name }}</td>
         <td>
-            <form method="POST" action="{{ url_for('update_dsa_topic', topic_id=topic.id) }}">
+            <form method="POST" action="{{ url_for('pages.update_dsa_topic', topic_id=topic.id) }}">
                 <select name="status">
                     <option value="Not Started" {% if topic.status == 'Not Started' %}selected{% endif %}>Not Started</option>
                     <option value="In Progress" {% if topic.status == 'In Progress' %}selected{% endif %}>In Progress</option>
@@ -44,7 +44,7 @@
             </form>
         </td>
         <td>
-            <form method="POST" action="{{ url_for('delete_dsa_topic', topic_id=topic.id) }}" onsubmit="return confirm('Delete this topic?');">
+            <form method="POST" action="{{ url_for('pages.delete_dsa_topic', topic_id=topic.id) }}" onsubmit="return confirm('Delete this topic?');">
                 <button type="submit">Delete</button>
             </form>
         </td>

@@ -12,7 +12,7 @@
         {% endif %}
     {% endwith %}
 
-    <form method="POST" action="{{ url_for('add_company_name') }}">
+    <form method="POST" action="{{ url_for('pages.add_company_name') }}">
         <input type="text" name="company_name" placeholder="Company name" required>
         <select name="status">
             <option value="Applied">Applied</option>
@@ -35,7 +35,7 @@
     <tr>
         <td>{{ company.company_name }}</td>
         <td>
-            <form method="POST" action="{{ url_for('update_company_status', company_id=company.id) }}">
+            <form method="POST" action="{{ url_for('pages.update_company_status', company_id=company.id) }}">
                 <select name="status">
                     <option value="Applied" {% if company.status == 'Applied' %}selected{% endif %}>Applied</option>
                     <option value="OA" {% if company.status == 'OA' %}selected{% endif %}>OA</option>
@@ -47,7 +47,7 @@
             </form>
         </td>
         <td>
-            <form method="POST" action="{{ url_for('delete_company', company_id=company.id) }}" onsubmit="return confirm('Delete this company?');">
+            <form method="POST" action="{{ url_for('pages.delete_company', company_id=company.id) }}" onsubmit="return confirm('Delete this company?');">
                 <button type="submit">Delete</button>
             </form>
         </td>
