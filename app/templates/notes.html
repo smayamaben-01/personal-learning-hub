@@ -12,28 +12,78 @@
     {% endif %}
 {% endwith %}
 
-<form method="POST" action="{{ url_for('pages.add_notes') }}">
-    <input type="text" name="title" placeholder="Title" required>
-    <textarea name="content" rows="5"></textarea>
+<form id="add-note-form">
+    <input type="text" id="note-title-input" name="title" placeholder="Title" required>
+    <textarea id="note-content-input" name="content" rows="5"></textarea>
     <button type="submit">Save</button>
 </form>
 
-{% if notes %}
-<div>
-    {% for note in notes %}
-        <div>
-            <h3>{{ note.title }}</h3>
-            <p>{{ note.content }}</p>
-            <small>{{ note.created_at }}</small>
-            <a href="{{ url_for('pages.edit_note', note_id=note.id) }}">Edit</a>
-            <form method="POST" action="{{ url_for('pages.delete_note', note_id=note.id) }}" onsubmit="return confirm('Delete this note?');" style="display:inline;">
-                <button type="submit">Delete</button>
-            </form>
-        </div>
-    {% endfor %}
+<div id="notes-container">
+    <!-- notes inserted by JavaScript -->
 </div>
-{% else %}
-<p>No notes yet - add one above!</p>
-{% endif %}
 
+<script>
+    async function loadNotes() {
+        const res = await fetch('/api/v1/notes');
+        const result = await res.json();
+        const divbody = document.getElementById('notes-container');
+        divbody.innerHTML = '';
+
+        result.data.forEach(note => {
+            const div = document.createElement('div');
+        div.innerHTML = `
+            <input type="text" id="title-${note.id}" value="${note.title}">
+            <textarea id="content-${note.id}" rows="5">${note.content}</textarea>
+            <button onclick="updateNote(${note.id})">Update</button>
+            <button onclick="deleteNote(${note.id})">Delete</button>
+        `;
+            divbody.appendChild(div);
+        });
+    }
+
+    document.getElementById('add-note-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const noteTitle = document.getElementById('note-title-input').value;
+        const noteContent = document.getElementById('note-content-input').value;
+
+        const res = await fetch('/api/v1/notes', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({title: noteTitle, content: noteContent})
+        });
+        const result = await res.json();
+
+        if (result.success) {
+            document.getElementById('note-title-input').value = '';
+            loadNotes();
+        } else {
+            alert(result.error);
+        }
+    });
+
+    async function updateNote(id) {
+        const noteTitle = document.getElementById(`title-${id}`).value;
+        const noteContent = document.getElementById(`content-${id}`).value;
+
+        const res = await fetch(`/api/v1/notes/${id}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({title: noteTitle, content: noteContent})
+        });
+        const result = await res.json();
+
+        if (result.success) {
+            loadNotes();
+        } else {
+            alert(result.error);
+        }
+    }
+
+    async function deleteNote(id) {
+        if (!confirm('Delete this note?')) return;
+        await fetch(`/api/v1/notes/${id}`, { method: 'DELETE' });
+        loadNotes();
+    }
+    loadNotes();
+</script>
 {% endblock %}

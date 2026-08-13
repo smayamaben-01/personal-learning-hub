@@ -12,47 +12,90 @@
     {% endif %}
 {% endwith %}
 
-<form method="POST" action="{{ url_for('pages.add_dsa_topic') }}">
-    <input type="text" name="topic_name" placeholder="Topic name" required>
+<form id="add-topic-form">
+    <input type="text" id="topic-name-input" name="topic_name" placeholder="Topic name" required>
     <button type="submit">Add Topic</button>
 </form>
 
-{% if topics %}
-<table>
+<table id="topics-table">
     <tr>
-        <th>Topics</th>
+        <th>Topic</th>
         <th>Status</th>
         <th>Questions Solved</th>
         <th>Actions</th>
     </tr>
-    {% for topic in topics %}
-    <tr>
-        <td>{{ topic.topic_name }}</td>
-        <td>
-            <form method="POST" action="{{ url_for('pages.update_dsa_topic', topic_id=topic.id) }}">
-                <select name="status">
-                    <option value="Not Started" {% if topic.status == 'Not Started' %}selected{% endif %}>Not Started</option>
-                    <option value="In Progress" {% if topic.status == 'In Progress' %}selected{% endif %}>In Progress</option>
-                    <option value="Completed" {% if topic.status == 'Completed' %}selected{% endif %}>Completed</option>
-                </select>
-        </td>
-        <td>
-                <input type="number" name="questions_solved" value="{{ topic.questions_solved }}" min="0">
-        </td>
-        <td>
-                <button type="submit">Submit</button>
-            </form>
-        </td>
-        <td>
-            <form method="POST" action="{{ url_for('pages.delete_dsa_topic', topic_id=topic.id) }}" onsubmit="return confirm('Delete this topic?');">
-                <button type="submit">Delete</button>
-            </form>
-        </td>
-    </tr>
-    {% endfor %}
+    <tbody id="topics-tbody">
+        <!-- rows will be inserted here by JavaScript -->
+    </tbody>
 </table>
-{% else %}
-<p>No topics yet - add one above!</p>
-{% endif %}
+
+<script>
+    async function loadTopics(){
+        const res = await fetch('/api/v1/dsa-topics');
+        const result = await res.json();
+        const tbody = document.getElementById('topics-tbody');
+        tbody.innerHTML = '';
+
+        result.data.forEach(topic => {
+            const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${topic.topic_name}</td>
+            <td>
+                <select id="status-${topic.id}">
+                    <option value="Not Started" ${topic.status === 'Not Started' ? 'selected' : ''}>Not Started</option>
+                    <option value="In Progress" ${topic.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                    <option value="Completed" ${topic.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                </select>
+            </td>
+            <td><input type="number" id="questions-${topic.id}" value="${topic.questions_solved}"></td>
+            <td><button onclick="deleteTopic(${topic.id})">Delete</button><button onclick="updateTopic(${topic.id})">Update</button></td>
+        `;
+            tbody.appendChild(row);
+        });
+    }
+    document.getElementById('add-topic-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const topicName = document.getElementById('topic-name-input').value;
+
+        const res = await fetch('/api/v1/dsa-topics', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({topic_name: topicName})
+        });
+        const result = await res.json();
+
+        if (result.success) {
+            document.getElementById('topic-name-input').value = '';
+            loadTopics();
+        } else {
+            alert(result.error);
+        }
+    });
+
+    async function updateTopic(id) {
+        const status = document.getElementById(`status-${id}`).value;
+        const questionsSolved = document.getElementById(`questions-${id}`).value;
+
+        const res = await fetch(`/api/v1/dsa-topics/${id}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({status: status, questions_solved: questionsSolved})
+        });
+        const result = await res.json();
+
+        if (result.success) {
+            loadTopics();
+        } else {
+            alert(result.error);
+        }
+    }
+
+    async function deleteTopic(id) {
+        if (!confirm('Delete this topic?')) return;
+        await fetch(`/api/v1/dsa-topics/${id}`, { method: 'DELETE' });
+        loadTopics();
+    }
+    loadTopics();
+</script>
 
 {% endblock %}

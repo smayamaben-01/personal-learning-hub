@@ -187,6 +187,10 @@ def add_notes():
         flash('Title is required.')
         return redirect(url_for('pages.notes'))
 
+    if len(title) > 150:
+            flash('Title must be 150 characters or fewer.')
+            return redirect(url_for('pages.notes'))
+
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("INSERT INTO notes (user_id, title, content) VALUES (%s, %s, %s)", (user_id, title, content))

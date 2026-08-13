@@ -12,9 +12,9 @@
         {% endif %}
     {% endwith %}
 
-    <form method="POST" action="{{ url_for('pages.add_company_name') }}">
-        <input type="text" name="company_name" placeholder="Company name" required>
-        <select name="status">
+    <form id="add-company-form">
+        <input type="text" id="company-name-input" name="company_name" placeholder="Company name" required>
+        <select name="status" id="add-status-input">
             <option value="Applied">Applied</option>
             <option value="OA">OA</option>
             <option value="Interview">Interview</option>
@@ -24,37 +24,86 @@
         <button type="submit">Add Company</button>
     </form>
 
-    {% if companies %}
-    <table>
-    <tr>
-        <th>Company</th>
-        <th>Status</th>
-        <th>Actions</th>
-    </tr>
-    {% for company in companies %}
-    <tr>
-        <td>{{ company.company_name }}</td>
-        <td>
-            <form method="POST" action="{{ url_for('pages.update_company_status', company_id=company.id) }}">
-                <select name="status">
-                    <option value="Applied" {% if company.status == 'Applied' %}selected{% endif %}>Applied</option>
-                    <option value="OA" {% if company.status == 'OA' %}selected{% endif %}>OA</option>
-                    <option value="Interview" {% if company.status == 'Interview' %}selected{% endif %}>Interview</option>
-                    <option value="Rejected" {% if company.status == 'Rejected' %}selected{% endif %}>Rejected</option>
-                    <option value="Selected" {% if company.status == 'Selected' %}selected{% endif %}>Selected</option>
-                </select>
-                <button type="submit">Update</button>
-            </form>
-        </td>
-        <td>
-            <form method="POST" action="{{ url_for('pages.delete_company', company_id=company.id) }}" onsubmit="return confirm('Delete this company?');">
-                <button type="submit">Delete</button>
-            </form>
-        </td>
-    </tr>
-    {% endfor %}
+    <table id="companies-table">
+        <tr>
+            <th>Company</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+        <tbody id="companies-tbody">
+            <!--Rows inserted by JavaScript-->
+        </tbody>
     </table>
-    {% else %}
-    <p>No companies yet - add one above!</p>
-    {% endif %}
+
+<script>
+    async function loadCompanies(){
+        const res = await fetch('/api/v1/companies');
+        const result = await res.json();
+        const tbody = document.getElementById('companies-tbody');
+        tbody.innerHTML = '';
+
+        result.data.forEach(company => {
+            const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${company.company_name}</td>
+            <td>
+                <select id="status-${company.id}">
+                    <option value="Applied" ${company.status === 'Applied' ? 'selected' : ''}>Applied</option>
+                    <option value="OA" ${company.status === 'OA' ? 'selected' : ''}>OA</option>
+                    <option value="Interview" ${company.status === 'Interview' ? 'selected' : ''}>Interview</option>
+                    <option value="Rejected" ${company.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
+                    <option value="Selected" ${company.status === 'Selected' ? 'selected' : ''}>Selected</option>
+                </select>
+            </td>
+            <td><button onclick="deleteCompany(${company.id})">Delete</button><button onclick="updateCompany(${company.id})">Update</button></td>
+        `;
+            tbody.appendChild(row);
+        });
+    }
+
+    document.getElementById('add-company-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const companyName = document.getElementById('company-name-input').value;
+        const status = document.getElementById('add-status-input').value;
+
+        const res = await fetch('/api/v1/companies', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({company_name: companyName, status: status})
+        });
+        const result = await res.json();
+
+        if (result.success) {
+            document.getElementById('company-name-input').value = '';
+            loadCompanies();
+        } else {
+            alert(result.error);
+        }
+    });
+
+    async function updateCompany(id) {
+        const status = document.getElementById(`status-${id}`).value;
+
+        const res = await fetch(`/api/v1/companies/${id}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({status: status})
+        });
+        const result = await res.json();
+
+        if (result.success) {
+            loadCompanies();
+        } else {
+            alert(result.error);
+        }
+    }
+
+    async function deleteCompany(id) {
+        if (!confirm('Delete this company?')) return;
+        await fetch(`/api/v1/companies/${id}`, { method: 'DELETE' });
+        loadCompanies();
+    }
+    loadCompanies();
+</script>
+
 {% endblock %}
