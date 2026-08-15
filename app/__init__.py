@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 import config
 
 def create_app():
@@ -10,6 +10,10 @@ def create_app():
     from app.api.dsa import api_dsa_bp
     from app.api.companies import api_company_bp
     from app.api.notes import api_note_bp
+
+    @app.errorhandler(Exception)
+    def handle_unexpected_error(e):
+        return jsonify({"success": False, "error": "An unexpected error occurred"}), 500
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(pages_bp)
