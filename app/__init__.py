@@ -13,6 +13,7 @@ def create_app():
 
     @app.errorhandler(Exception)
     def handle_unexpected_error(e):
+        app.logger.exception(e)
         return jsonify({"success": False, "error": "An unexpected error occurred"}), 500
 
     app.register_blueprint(auth_bp)
