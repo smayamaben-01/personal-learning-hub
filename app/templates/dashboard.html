@@ -8,11 +8,65 @@
     <p>Notes: {{ total_notes }}</p>
 </div>
 
+<div>
+    <input type="text" id="search-query" placeholder="Search">
+    <button id="search-button">Search</button>
+</div>
+<div id="search-results"></div>
+
 <canvas id="statusChart"></canvas>
 <canvas id="funnelChart"></canvas>
 <canvas id="notesChart"></canvas>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.getElementById('search-button').addEventListener('click', async function() {
+        const keyword = document.getElementById('search-query').value;
+        const res = await fetch(`/api/v1/search?q=${encodeURIComponent(keyword)}&type=all`);
+        const result = await res.json();
+        const container = document.getElementById('search-results');
+        container.innerHTML = '';
+
+        if (!result.success) {
+            container.innerHTML = `<p>${result.error}</p>`;
+            return;
+        }
+
+        const data = result.data;
+
+        // DSA topics section
+        container.innerHTML += `<h3>DSA Topics</h3>`;
+        if (data.dsa_topics.length === 0) {
+            container.innerHTML += `<p>No matches</p>`;
+        } else {
+            data.dsa_topics.forEach(topic => {
+                container.innerHTML += `<p>${topic.topic_name}</p>`;
+            });
+        }
+
+        // Companies section
+        container.innerHTML += `<h3>Companies</h3>`;
+        if (data.companies.length === 0) {
+            container.innerHTML += `<p>No matches</p>`;
+        } else {
+            data.companies.forEach(company => {
+                container.innerHTML += `<p>${company.company_name}</p>`;
+            });
+        }
+
+        // Notes section
+        container.innerHTML += `<h3>Notes</h3>`;
+        if (data.notes.length === 0) {
+            container.innerHTML += `<p>No matches</p>`;
+        } else {
+            data.notes.forEach(note => {
+                container.innerHTML += `<p>${note.title}</p>`;
+            });
+        }
+    });
+</script>
+
 <script>
     async function loadDashboardCharts() {
         const res = await fetch('/api/v1/dashboard/stats');

@@ -9,3 +9,7 @@ def require_one_of(value, allowed_values, field_name):
 def require_max_length(value, max_length, field_name):
       if len(value) > max_length:
             raise ValueError(f"{field_name} must be {max_length} characters or fewer.")
+
+def require_min_length(value, min_length, field_name):
+      if len(value) < min_length:
+            raise ValueError(f"{field_name} must have {min_length} characters or more.")
