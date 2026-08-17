@@ -10,6 +10,7 @@ def create_app():
     from app.api.dsa import api_dsa_bp
     from app.api.companies import api_company_bp
     from app.api.notes import api_note_bp
+    from app.api.dashboard import api_dashboard_bp
 
     @app.errorhandler(Exception)
     def handle_unexpected_error(e):
@@ -21,5 +22,6 @@ def create_app():
     app.register_blueprint(api_dsa_bp)
     app.register_blueprint(api_company_bp)
     app.register_blueprint(api_note_bp)
+    app.register_blueprint(api_dashboard_bp)
 
     return app

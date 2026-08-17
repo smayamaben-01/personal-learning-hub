@@ -7,4 +7,62 @@
     <p>Companies tracked: {{ total_companies }}</p>
     <p>Notes: {{ total_notes }}</p>
 </div>
+
+<canvas id="statusChart"></canvas>
+<canvas id="funnelChart"></canvas>
+<canvas id="notesChart"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    async function loadDashboardCharts() {
+        const res = await fetch('/api/v1/dashboard/stats');
+        const result = await res.json();
+        const stats = result.data;
+
+        console.log(stats); // just to confirm shape while building
+
+        const statusLabels = stats.topics_by_status.map(item => item.status);
+        const statusCounts = stats.topics_by_status.map(item => item.count);
+
+        new Chart(document.getElementById('statusChart'), {
+            type: 'doughnut',
+            data: {
+                 labels: statusLabels,
+                 datasets: [{
+                    label: 'DSA Topics by Status',
+                    data: statusCounts
+                }]
+            }
+        });
+
+        const funnelLabels = Object.keys(stats.company_funnel);   // ["applied", "oa", "interview", "selected", "rejected"]
+        const funnelCounts = Object.values(stats.company_funnel); // [0, 0, 0, 0, 1]
+
+        new Chart(document.getElementById('funnelChart'), {
+            type: 'bar',
+            data: {
+                 labels: funnelLabels,
+                 datasets: [{
+                    label: 'Company Applications by Status',
+                    data: funnelCounts
+                }]
+            }
+        });
+
+        const notesLabels = stats.notes_per_week.map(item => item.week_number);
+        const notesCounts = stats.notes_per_week.map(item => item.notes_count);
+
+        new Chart(document.getElementById('notesChart'), {
+            type: 'line',
+            data: {
+                 labels: notesLabels,
+                 datasets: [{
+                    label: 'Notes per Week',
+                    data: notesCounts
+                }]
+            }
+        });
+    }
+    loadDashboardCharts();
+</script>
 {% endblock %}
