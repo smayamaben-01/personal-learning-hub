@@ -1,8 +1,11 @@
 from app.repositories import notes_repository
-from app.utils import validation
+from app.utils import validation, render
 
 def get_user_notes(user_id):
-    return notes_repository.get_notes_by_user(user_id)
+    notes = notes_repository.get_notes_by_user(user_id)
+    for note in notes:
+        note['rendered_content'] = render.render_note_content(note['content'])
+    return notes
 
 def create_note(user_id, title, content):
     validation.require_non_empty(title, "Title")

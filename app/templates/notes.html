@@ -32,6 +32,7 @@
         result.data.forEach(note => {
             const div = document.createElement('div');
         div.innerHTML = `
+            <div>${note.rendered_content}</div>
             <input type="text" id="title-${note.id}" value="${note.title}">
             <textarea id="content-${note.id}" rows="5">${note.content}</textarea>
             <button onclick="updateNote(${note.id})">Update</button>
