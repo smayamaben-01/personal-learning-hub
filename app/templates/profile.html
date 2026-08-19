@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Profile</h1>
+
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
+
+<form id="profile-form">
+    <input type="text" id="profile-name-input" name="full_name" placeholder="Full name">
+    <input type="text" id="profile-email-input" name="email" placeholder="Email">
+    <textarea id="profile-bio-input" name="bio" rows="5"></textarea>
+    <button type="submit">Save</button>
+</form>
+
+<script>
+    async function loadProfile() {
+        const res = await fetch('/api/v1/profile');
+        const result = await res.json();
+        const profile = result.data;
+
+        document.getElementById('profile-name-input').value = profile.full_name || '';
+        document.getElementById('profile-email-input').value = profile.email || '';
+        document.getElementById('profile-bio-input').value = profile.bio || '';
+    }
+
+    document.getElementById('profile-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const fullName = document.getElementById('profile-name-input').value;
+        const email = document.getElementById('profile-email-input').value;
+        const bio = document.getElementById('profile-bio-input').value;
+
+        const res = await fetch('/api/v1/profile', {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({full_name: fullName, email: email, bio: bio})
+        });
+        const result = await res.json();
+
+        if (result.success) {
+            loadProfile();
+        } else {
+            alert(result.error);
+        }
+    });
+
+    loadProfile();
+</script>
+{% endblock %}

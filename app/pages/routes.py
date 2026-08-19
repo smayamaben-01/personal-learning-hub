@@ -250,3 +250,16 @@ def delete_note(note_id):
 
     flash('Note deleted.')
     return redirect(url_for('pages.notes'))
+
+@pages_bp.route('/profile')
+@login_required
+def profile():
+    user_id = session['user_id']
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT id, username, full_name, email, bio, updated_at FROM users WHERE id = %s", (user_id,))
+    profile = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return render_template('profile.html', profile=profile)
+
