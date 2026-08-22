@@ -13,6 +13,7 @@ def create_app():
     from app.api.dashboard import api_dashboard_bp
     from app.api.search import api_search_bp
     from app.api.profile import api_profile_bp
+    from app.api.password import api_password_bp
 
     @app.errorhandler(Exception)
     def handle_unexpected_error(e):
@@ -27,5 +28,6 @@ def create_app():
     app.register_blueprint(api_dashboard_bp)
     app.register_blueprint(api_search_bp)
     app.register_blueprint(api_profile_bp)
+    app.register_blueprint(api_password_bp)
 
     return app
