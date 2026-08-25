@@ -1,4 +1,5 @@
 venv/
 __pycache__/
 .env
-*.pyc
+*.pyccheck_db.py 
+run_migration.py 
