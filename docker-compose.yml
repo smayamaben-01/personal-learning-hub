@@ -1,0 +1,27 @@
+services:
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      DB_HOST: db
+      DB_USER: app_user
+      DB_PASSWORD: devpass1234
+      DB_NAME: learning_hub
+      DB_PORT: 3306
+      SECRET_KEY: illjustmashmykeyboardforrandomchars
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass5678
+      MYSQL_DATABASE: learning_hub
+      MYSQL_USER: app_user
+      MYSQL_PASSWORD: devpass1234
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
