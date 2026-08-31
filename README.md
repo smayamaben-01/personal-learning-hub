@@ -45,6 +45,10 @@ The full set of API endpoints (DSA, companies, notes, auth, profile) is document
 
 📄 [`docs/postman_collection.json`](docs/postman_collection.json) — import directly into Postman to explore and test every endpoint.
 
+🔗 **Live demo:** https://personal-learning-hub.onrender.com
+
+> Note: hosted on a free tier — the first load after inactivity may take 10-30 seconds while the server wakes up.
+
 ## Setup Instructions
 
 ### Option A — Docker Compose (recommended)
