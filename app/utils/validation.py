@@ -19,3 +19,7 @@ def require_min_length(value, min_length, field_name):
 def require_valid_email(value, field_name):
     if value and not re.match(r'^[^@\s]+@[^@\s]+\.[^@\s]+$', value):
         raise ValueError(f"{field_name} must be a valid email address.")
+
+def require_positive_int(value, field_name):
+    if not isinstance(value, int) or value <= 0:
+        raise ValueError(f"{field_name} must be a positive whole number.")
