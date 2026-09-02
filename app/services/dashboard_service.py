@@ -3,11 +3,11 @@ from app.repositories import dashboard_repository
 def get_dashboard_stats(user_id):
     funnel = dashboard_repository.get_company_status(user_id)
     company_funnel = {
-    "applied": int(funnel["applied"]),
-    "oa": int(funnel["oa"]),
-    "interview": int(funnel["interview"]),
-    "selected": int(funnel["selected"]),
-    "rejected": int(funnel["rejected"])
+    "applied": int(funnel["applied"] or 0),
+    "oa": int(funnel["oa"] or 0),
+    "interview": int(funnel["interview"] or 0),
+    "selected": int(funnel["selected"] or 0),
+    "rejected": int(funnel["rejected"] or 0)
         }
 
     return {
