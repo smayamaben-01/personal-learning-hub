@@ -1,9 +1,12 @@
 from flask import Flask, jsonify
 import config
+from flask_cors import CORS
 
 def create_app():
     app = Flask(__name__)
     app.secret_key = config.SECRET_KEY
+
+    CORS(app, supports_credentials=True, origins=["http://localhost:5173"])
 
     from app.auth.routes import auth_bp
     from app.pages.routes import pages_bp
@@ -15,6 +18,7 @@ def create_app():
     from app.api.profile import api_profile_bp
     from app.api.password import api_password_bp
     from app.api.goals import api_goals_bp
+    from app.api.auth import api_auth_bp
 
     @app.errorhandler(Exception)
     def handle_unexpected_error(e):
@@ -31,5 +35,6 @@ def create_app():
     app.register_blueprint(api_profile_bp)
     app.register_blueprint(api_password_bp)
     app.register_blueprint(api_goals_bp)
+    app.register_blueprint(api_auth_bp)
 
     return app
