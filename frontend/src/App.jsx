@@ -2,6 +2,12 @@ import { Routes, Route } from 'react-router-dom'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
+import DsaTracker from './pages/DsaTracker'
+import CompanyTracker from './pages/CompanyTracker'
+import Notes from './pages/Notes'
+import Profile from './pages/Profile'
+import PasswordChange from './pages/PasswordChange'
+import Goals from './pages/Goals'
 
 function Home() {
   return (
@@ -19,6 +25,12 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/" element={<Dashboard />} />
+      <Route path="/dsa" element={<DsaTracker />} />
+      <Route path="/companies" element={<CompanyTracker />} />
+      <Route path="/notes" element={<Notes />} />
+      <Route path="/profile" element={<Profile />} />
+      <Route path="/profile/password" element={<PasswordChange />} />
+      <Route path="/goals" element={<Goals />} />
     </Routes>
   )
 }
